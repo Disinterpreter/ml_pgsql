@@ -17,6 +17,7 @@
 *********************************************************/
 
 #include "CFunctions.h"
+#include <vector>
 
 int CFunctions::pg_conn(lua_State* luaVM)
 {
@@ -36,12 +37,41 @@ int CFunctions::pg_conn(lua_State* luaVM)
     return 1;
 }
 
+
+
 int CFunctions::pg_query(lua_State* luaVM)
 {
     void* conn = lua_touserdata(luaVM, 1);
     const char* str = luaL_checkstring(luaVM, 2);
     PGresult* query;
-    query = PQexec((PGconn*)conn, str); 
+    // query = PQexec((PGconn*)conn, str);
+
+    lua_remove(luaVM, 1);
+    lua_remove(luaVM, 1);
+
+    int totalArgs = lua_gettop(luaVM);
+
+
+
+    char* paramValues[255];
+    char* test = new char[255];
+    for (int i = totalArgs; i > 0; --i) {
+        printf("args %s\n", luaL_checkstring(luaVM, i));
+        const char* args = luaL_checkstring(luaVM, i);
+        
+        strcpy(test, args);
+        paramValues[i-1] = test;
+    }
+
+
+    query = PQexecParams((PGconn*)conn,
+        str,
+        totalArgs,       /* one param */
+        NULL,    /* let the backend deduce param type */
+        paramValues,
+        NULL,
+        NULL,
+        0);
     if ( (PQresultStatus(query) != PGRES_COMMAND_OK) && (PQresultStatus(query) != PGRES_TUPLES_OK))
     {
         lua_pushstring(luaVM, PQerrorMessage((PGconn*)conn));
@@ -52,6 +82,7 @@ int CFunctions::pg_query(lua_State* luaVM)
     int ncols = PQnfields(query);
     int nrows = PQntuples(query);
 
+   
     lua_newtable(luaVM);
     for (int i = 0; i < nrows; i++)
     {
@@ -66,7 +97,7 @@ int CFunctions::pg_query(lua_State* luaVM)
             lua_settable(luaVM, -3);
         }
     }
-    lua_settable(luaVM, -3);
+    //lua_settable(luaVM, -3);
     PQclear(query);
     return 1;
 }
