@@ -17,7 +17,6 @@
 *********************************************************/
 
 #include "CFunctions.h"
-#include <vector>
 
 int CFunctions::pg_conn(lua_State* luaVM)
 {
@@ -31,12 +30,12 @@ int CFunctions::pg_conn(lua_State* luaVM)
         lua_pushstring(luaVM, errmsg);
         return 2;
     }
-    else {
+    else 
+    {
         lua_pushlightuserdata(luaVM, connection);
     }
     return 1;
 }
-
 
 
 int CFunctions::pg_query(lua_State* luaVM)
@@ -44,7 +43,6 @@ int CFunctions::pg_query(lua_State* luaVM)
     void* conn = lua_touserdata(luaVM, 1);
     const char* str = luaL_checkstring(luaVM, 2);
     PGresult* query;
-    // query = PQexec((PGconn*)conn, str);
 
     lua_remove(luaVM, 1);
     lua_remove(luaVM, 1);
@@ -54,13 +52,11 @@ int CFunctions::pg_query(lua_State* luaVM)
 
 
     char* paramValues[255];
-    char* test = new char[255];
     for (int i = totalArgs; i > 0; --i) {
-        printf("args %s\n", luaL_checkstring(luaVM, i));
         const char* args = luaL_checkstring(luaVM, i);
-        
-        strcpy(test, args);
-        paramValues[i-1] = test;
+        char* t_param = new char[255];
+        strcpy(t_param, args);
+        paramValues[i-1] = t_param;
     }
 
 
@@ -74,20 +70,80 @@ int CFunctions::pg_query(lua_State* luaVM)
         0);
     if ( (PQresultStatus(query) != PGRES_COMMAND_OK) && (PQresultStatus(query) != PGRES_TUPLES_OK))
     {
+        lua_pushboolean(luaVM, 0);
         lua_pushstring(luaVM, PQerrorMessage((PGconn*)conn));
         PQclear(query);
-        return 1;
+        return 2;
     }
 
+
+
+    lua_pushlightuserdata(luaVM, query);
+    return 1;
+}
+
+int CFunctions::pg_exec(lua_State* luaVM)
+{
+    void* conn = lua_touserdata(luaVM, 1);
+    // error handlers
+    if (PQstatus((PGconn*)conn) != CONNECTION_OK) 
+    {
+        return 0;
+    }
+    const char* str = luaL_checkstring(luaVM, 2);
+    PGresult* query;
+
+    lua_remove(luaVM, 1);
+    lua_remove(luaVM, 1);
+
+    int totalArgs = lua_gettop(luaVM);
+
+
+
+    char* paramValues[255];
+    for (int i = totalArgs; i > 0; --i) {
+        const char* args = luaL_checkstring(luaVM, i);
+        char* t_param = new char[255];
+        strcpy(t_param, args);
+        paramValues[i - 1] = t_param;
+    }
+
+
+    query = PQexecParams((PGconn*)conn,
+        str,
+        totalArgs,       /* one param */
+        NULL,    /* let the backend deduce param type */
+        paramValues,
+        NULL,
+        NULL,
+        0);
+    if ((PQresultStatus(query) != PGRES_COMMAND_OK) && (PQresultStatus(query) != PGRES_TUPLES_OK))
+    {
+        lua_pushboolean(luaVM, 0);
+        lua_pushstring(luaVM, PQerrorMessage((PGconn*)conn));
+        PQclear(query);
+        return 2;
+    }
+
+
+    PQclear(query);
+    lua_pushboolean(luaVM, 1);
+    return 1;
+}
+int CFunctions::pg_poll(lua_State* luaVM)
+{
+    void* argquery = lua_touserdata(luaVM, 1);
+    
+    PGresult* query = (PGresult*)argquery;
     int ncols = PQnfields(query);
     int nrows = PQntuples(query);
 
-   
+
     lua_newtable(luaVM);
     for (int i = 0; i < nrows; i++)
     {
         lua_newtable(luaVM);
-        for (int coloumn = 0; coloumn < ncols; coloumn++) 
+        for (int coloumn = 0; coloumn < ncols; coloumn++)
         {
 
             char* colname = PQfname(query, coloumn);
@@ -102,3 +158,11 @@ int CFunctions::pg_query(lua_State* luaVM)
     return 1;
 }
 
+int CFunctions::pg_free(lua_State* luaVM)
+{
+    void* argquery = lua_touserdata(luaVM, 1);
+    PGresult* query = (PGresult*)argquery;
+    PQclear(query);
+    lua_pushboolean(luaVM, 1);
+    return 1;
+}
