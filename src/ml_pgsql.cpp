@@ -75,8 +75,5 @@ MTAEXPORT void ResourceStopped ( lua_State * luaVM )
 
 MTAEXPORT bool ShutdownModule ( void )
 {
-
-
-
 	return true;
 }

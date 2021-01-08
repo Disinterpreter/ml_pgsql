@@ -20,8 +20,13 @@
 
 int CFunctions::pg_conn(lua_State* luaVM)
 {
-    const char* str = luaL_checkstring(luaVM, 1);
-    PGconn* connection = PQconnectdb(str);
+    const char* connectionSring = luaL_checkstring(luaVM, 1);
+    const int poolSize = luaL_checkinteger(luaVM, 2);
+
+    CFunctions instance;
+    instance.createConnctionPool(connectionSring, poolSize);
+
+    /*PGconn* connection = PQconnectdb(str);
     if (PQstatus(connection) != CONNECTION_OK)
     {
         char* errmsg = PQerrorMessage(connection);
@@ -32,7 +37,9 @@ int CFunctions::pg_conn(lua_State* luaVM)
     else 
     {
         lua_pushlightuserdata(luaVM, connection);
-    }
+    }*/
+
+
     return 1;
 }
 
@@ -164,4 +171,33 @@ int CFunctions::pg_free(lua_State* luaVM)
     PQclear(query);
     lua_pushboolean(luaVM, 1);
     return 1;
+}
+
+void CFunctions::createConnctionPool(const char* connectionString, int poolSize) {
+    std::lock_guard<std::mutex> lock(m_databaseMutex);
+    unsigned short int counter = 0;
+    for (auto i = 0; i < poolSize; i++) {
+        m_databaseConnectionPool.emplace(std::make_shared<CPGConnection>(connectionString));
+        counter++;
+    }
+    printf("Pool size: %d", counter);
+}
+
+std::shared_ptr<CPGConnection> CFunctions::connection() {
+    std::unique_lock<std::mutex> lock(m_databaseMutex);
+
+    while (m_databaseConnectionPool.empty()) {
+        m_databaseCondition.wait(lock);
+    }
+
+    auto databaseConnection = m_databaseConnectionPool.front();
+    m_databaseConnectionPool.pop();
+    return databaseConnection;
+}
+
+void CFunctions::freeConnection(std::shared_ptr<CPGConnection> databaseConnection) {
+    std::unique_lock<std::mutex> lock(m_databaseMutex);
+    m_databaseConnectionPool.push(databaseConnection);
+    lock.unlock();
+    m_databaseCondition.notify_one();
 }

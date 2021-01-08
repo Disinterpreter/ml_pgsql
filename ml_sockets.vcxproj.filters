@@ -44,6 +44,9 @@
     <ClCompile Include="src\ml_pgsql.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CPGConnection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\CFunctions.h">
@@ -116,6 +119,9 @@
       <Filter>Header Files\include</Filter>
     </ClInclude>
     <ClInclude Include="include\ml_pgsql.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CPGConnection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

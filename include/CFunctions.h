@@ -23,6 +23,10 @@ class CFunctions;
 
 #include <stdio.h>
 #include <libpq-fe.h>
+#include <mutex>
+#include <queue>
+
+#include <CPGConnection.h>
 
 #include "ml_pgsql.h"
 #include "include/ILuaModuleManager.h"
@@ -32,6 +36,17 @@ extern ILuaModuleManager10 *pModuleManager;
 
 class CFunctions
 {
+private:
+    static CFunctions instance;
+
+    std::mutex m_databaseMutex;
+    std::condition_variable m_databaseCondition;
+    std::queue<std::shared_ptr<CPGConnection>> m_databaseConnectionPool;
+
+    void createConnctionPool(const char* connectionString, int poolSize = 1);
+    std::shared_ptr<CPGConnection> connection();
+    void freeConnection(std::shared_ptr<CPGConnection> databaseConnection);
+
 public:
     static int pg_conn(lua_State* luaVM);
     static int pg_query(lua_State* luaVM);

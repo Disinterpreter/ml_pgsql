@@ -185,7 +185,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>./lib/x64/lua5.1.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>F:\Program Files (x86)\MTASA\server\x64\modules\ml_pgsql.dll</OutputFile>
+      <OutputFile>D:\MTA Server\x64\modules\ml_pgsql.dll</OutputFile>
       <IgnoreSpecificDefaultLibraries>MSVCRT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile />
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -231,6 +231,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CPGConnection.cpp" />
     <ClCompile Include="src\CFunctions.cpp" />
     <ClCompile Include="src\ml_pgsql.cpp" />
     <ClCompile Include="src\CLuaArgument.cpp" />
@@ -243,6 +244,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CPGConnection.h" />
     <ClInclude Include="include\CFunctions.h" />
     <ClInclude Include="include\Common.h" />
     <ClInclude Include="include\internal\c.h" />
