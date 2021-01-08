@@ -22,7 +22,6 @@ int CFunctions::pg_conn(lua_State* luaVM)
 {
     const char* str = luaL_checkstring(luaVM, 1);
     PGconn* connection = PQconnectdb(str);
-    lua_pushlightuserdata(luaVM, connection);
     if (PQstatus(connection) != CONNECTION_OK)
     {
         char* errmsg = PQerrorMessage(connection);
