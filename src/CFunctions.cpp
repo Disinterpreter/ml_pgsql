@@ -18,13 +18,21 @@
 
 #include "CFunctions.h"
 
+CFunctions* CFunctions::m_instance = 0;
+
 int CFunctions::pg_conn(lua_State* luaVM)
 {
     const char* connectionSring = luaL_checkstring(luaVM, 1);
     const int poolSize = luaL_checkinteger(luaVM, 2);
 
-    CFunctions instance;
-    instance.createConnctionPool(connectionSring, poolSize);
+    //m_instance = new CFunctions();
+
+    GetInstance()->createConnctionPool(connectionSring, poolSize);
+
+    printf("test SiZe %d\n", GetInstance()->m_databaseConnectionPool.size());
+
+    //printf("test SiZe %d\n", m_instance->m_databaseConnectionPool.size());
+    
 
     /*PGconn* connection = PQconnectdb(str);
     if (PQstatus(connection) != CONNECTION_OK)
@@ -46,7 +54,27 @@ int CFunctions::pg_conn(lua_State* luaVM)
 
 int CFunctions::pg_query(lua_State* luaVM)
 {
-    void* conn = lua_touserdata(luaVM, 1);
+    const char* query = luaL_checkstring(luaVM, 1);
+    lua_remove(luaVM, 1);
+
+
+    printf("pg_query test size%d\n", GetInstance()->m_databaseConnectionPool.size());
+
+    auto databaseConnection = GetInstance()->connection();
+
+    PQsendQuery(databaseConnection->connection().get(), query);
+
+    while (auto result = PQgetResult(databaseConnection->connection().get())) {
+        if (PQresultStatus(result) == PGRES_TUPLES_OK && PQntuples(result)) {
+            printf("KOSTYAN, PIZDYI V AMERIKU!");
+        }
+
+        if (PQresultStatus(result) == PGRES_FATAL_ERROR) {
+            printf("pezda, error");
+        }
+    }
+
+    /*void* conn = lua_touserdata(luaVM, 1);
     const char* str = luaL_checkstring(luaVM, 2);
     PGresult* query;
 
@@ -68,8 +96,8 @@ int CFunctions::pg_query(lua_State* luaVM)
 
     query = PQexecParams((PGconn*)conn,
         str,
-        totalArgs,       /* one param */
-        NULL,    /* let the backend deduce param type */
+        totalArgs,      
+        NULL,    
         paramValues,
         NULL,
         NULL,
@@ -81,10 +109,10 @@ int CFunctions::pg_query(lua_State* luaVM)
         PQclear(query);
         return 2;
     }
+     
 
 
-
-    lua_pushlightuserdata(luaVM, query);
+    lua_pushlightuserdata(luaVM, query);*/
     return 1;
 }
 
@@ -185,7 +213,6 @@ void CFunctions::createConnctionPool(const char* connectionString, int poolSize)
 
 std::shared_ptr<CPGConnection> CFunctions::connection() {
     std::unique_lock<std::mutex> lock(m_databaseMutex);
-
     while (m_databaseConnectionPool.empty()) {
         m_databaseCondition.wait(lock);
     }

@@ -23,6 +23,8 @@ class CFunctions;
 
 #include <stdio.h>
 #include <libpq-fe.h>
+#include <condition_variable>
+#include <memory>
 #include <mutex>
 #include <queue>
 
@@ -37,7 +39,7 @@ extern ILuaModuleManager10 *pModuleManager;
 class CFunctions
 {
 private:
-    static CFunctions instance;
+    static CFunctions* m_instance;
 
     std::mutex m_databaseMutex;
     std::condition_variable m_databaseCondition;
@@ -46,6 +48,13 @@ private:
     void createConnctionPool(const char* connectionString, int poolSize = 1);
     std::shared_ptr<CPGConnection> connection();
     void freeConnection(std::shared_ptr<CPGConnection> databaseConnection);
+
+    //int(*fcnPrt)() = connection;
+
+    static CFunctions* GetInstance() {
+        if (!m_instance) m_instance = new CFunctions;
+        return m_instance;
+    }
 
 public:
     static int pg_conn(lua_State* luaVM);
