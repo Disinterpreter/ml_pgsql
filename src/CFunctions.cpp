@@ -66,14 +66,17 @@ int CFunctions::pg_query(lua_State* luaVM)
 
     while (auto result = PQgetResult(databaseConnection->connection().get())) {
         if (PQresultStatus(result) == PGRES_TUPLES_OK && PQntuples(result)) {
-            printf("KOSTYAN, PIZDYI V AMERIKU!");
+            printf("KOSTYAN, PIZDYI V AMERIKU!\n");
         }
 
         if (PQresultStatus(result) == PGRES_FATAL_ERROR) {
-            printf("pezda, error");
+            printf("pezda, error\n");
         }
     }
 
+    printf("pg_query test size%d\n", GetInstance()->m_databaseConnectionPool.size());
+    GetInstance()->freeConnection(databaseConnection);
+    printf("pg_query test size%d\n", GetInstance()->m_databaseConnectionPool.size());
     /*void* conn = lua_touserdata(luaVM, 1);
     const char* str = luaL_checkstring(luaVM, 2);
     PGresult* query;
