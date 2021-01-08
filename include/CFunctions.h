@@ -49,8 +49,6 @@ private:
     std::shared_ptr<CPGConnection> connection();
     void freeConnection(std::shared_ptr<CPGConnection> databaseConnection);
 
-    //int(*fcnPrt)() = connection;
-
     static CFunctions* GetInstance() {
         if (!m_instance) m_instance = new CFunctions;
         return m_instance;
