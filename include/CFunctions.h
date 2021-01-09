@@ -38,5 +38,6 @@ public:
     static int pg_poll(lua_State* luaVM);
     static int pg_free(lua_State* luaVM);
     static int pg_exec(lua_State* luaVM);
+    static int pg_close(lua_State* luaVM);
 };
 #endif

@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{132A627F-058D-46F8-BCBB-63B6C8D2CC1A}</ProjectGuid>
-    <RootNamespace>ml_sockets</RootNamespace>
+    <RootNamespace>ml_pgsql</RootNamespace>
     <Keyword>MFCDLLProj</Keyword>
     <ProjectName>ml_pgsql</ProjectName>
   </PropertyGroup>

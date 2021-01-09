@@ -22,7 +22,7 @@ int CFunctions::pg_conn(lua_State* luaVM)
 {
     const char* str = luaL_checkstring(luaVM, 1);
     PGconn* connection = PQconnectdb(str);
-    if (PQstatus(connection) != CONNECTION_OK)
+    if (PQstatus(connection) != CONNECTION_OK && PQsetnonblocking(connection, 1))
     {
         char* errmsg = PQerrorMessage(connection);
         lua_pushboolean(luaVM, 0);
@@ -162,6 +162,14 @@ int CFunctions::pg_free(lua_State* luaVM)
     void* argquery = lua_touserdata(luaVM, 1);
     PGresult* query = (PGresult*)argquery;
     PQclear(query);
+    lua_pushboolean(luaVM, 1);
+    return 1;
+}
+
+int CFunctions::pg_close(lua_State* luaVM)
+{
+    void* conn = lua_touserdata(luaVM, 1);
+    PQfinish((PGconn*)conn);
     lua_pushboolean(luaVM, 1);
     return 1;
 }
