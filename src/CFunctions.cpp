@@ -22,24 +22,44 @@ int CFunctions::pg_conn(lua_State* luaVM)
 {
     const char* str = luaL_checkstring(luaVM, 1);
     PGconn* connection = PQconnectdb(str);
-    if (PQstatus(connection) != CONNECTION_OK && PQsetnonblocking(connection, 1))
+    if ( (PQstatus(connection) != CONNECTION_OK))
     {
         char* errmsg = PQerrorMessage(connection);
+        PQfinish(connection);
         lua_pushboolean(luaVM, 0);
         lua_pushstring(luaVM, errmsg);
         return 2;
     }
     else 
     {
-        lua_pushlightuserdata(luaVM, connection);
+        if (PQsetnonblocking(connection, 1) == 0) {
+            lua_pushlightuserdata(luaVM, connection);
+            return 1;
+        }
+        else
+        {
+            char* errmsg = PQerrorMessage(connection);
+            PQfinish(connection);
+            lua_pushboolean(luaVM, 0);
+            lua_pushstring(luaVM, errmsg);
+            return 2;
+        }
+        
+        
     }
-    return 1;
+   
 }
 
 
 int CFunctions::pg_query(lua_State* luaVM)
 {
     void* conn = lua_touserdata(luaVM, 1);
+    if (PQstatus((PGconn*)conn) != CONNECTION_OK && PQsetnonblocking((PGconn*)conn, 1) == 0) {
+        char* errmsg = PQerrorMessage((PGconn*)conn);
+        lua_pushboolean(luaVM, 0);
+        lua_pushstring(luaVM, errmsg);
+        return 2;
+    }
     const char* str = luaL_checkstring(luaVM, 2);
     PGresult* query;
 
@@ -84,10 +104,11 @@ int CFunctions::pg_query(lua_State* luaVM)
 int CFunctions::pg_exec(lua_State* luaVM)
 {
     void* conn = lua_touserdata(luaVM, 1);
-    // error handlers
-    if (PQstatus((PGconn*)conn) != CONNECTION_OK) 
-    {
-        return 0;
+    if (PQstatus((PGconn*)conn) != CONNECTION_OK && PQsetnonblocking((PGconn*)conn, 1) == 0) {
+        char* errmsg = PQerrorMessage((PGconn*)conn);
+        lua_pushboolean(luaVM, 0);
+        lua_pushstring(luaVM, errmsg);
+        return 2;
     }
     const char* str = luaL_checkstring(luaVM, 2);
     PGresult* query;
@@ -169,6 +190,12 @@ int CFunctions::pg_free(lua_State* luaVM)
 int CFunctions::pg_close(lua_State* luaVM)
 {
     void* conn = lua_touserdata(luaVM, 1);
+    if (PQstatus((PGconn*)conn) != CONNECTION_OK && PQsetnonblocking((PGconn*)conn, 1) == 0) {
+        char* errmsg = PQerrorMessage((PGconn*)conn);
+        lua_pushboolean(luaVM, 0);
+        lua_pushstring(luaVM, errmsg);
+        return 2;
+    }
     PQfinish((PGconn*)conn);
     lua_pushboolean(luaVM, 1);
     return 1;
