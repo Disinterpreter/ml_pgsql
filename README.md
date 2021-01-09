@@ -7,6 +7,7 @@ I accept any help with developing the module. Feel free to make PRs and Issues.
 # Installation
 ### Windows
 Put misc files from Releases to `server\x64\` make a `modules` directory and put the `ml_pgsql.dll` file there.
+And put this line `<module src="ml_pgsql.dll" />` to `mtaserver.conf`
 ### Linux
 Not yet.
 
