@@ -117,12 +117,9 @@ int CFunctions::pg_exec(lua_State* luaVM)
 
 
 
-    char* paramValues[255];
+    std::vector<const char*> args{};
     for (int i = totalArgs; i > 0; --i) {
-        const char* args = luaL_checkstring(luaVM, i);
-        char* t_param = new char[255];
-        strcpy(t_param, args);
-        paramValues[i - 1] = t_param;
+        args.push_back(luaL_checkstring(luaVM, i));
     }
 
 
@@ -130,7 +127,7 @@ int CFunctions::pg_exec(lua_State* luaVM)
         str,
         totalArgs,       /* one param */
         NULL,    /* let the backend deduce param type */
-        paramValues,
+        (char**)args.data(),
         NULL,
         NULL,
         0);
