@@ -4,9 +4,9 @@
 *
 *  ml_base, External lua add-on module
 *  
-*  Copyright © 2003-2008 MTA.  All Rights Reserved.
+*  Copyright ï¿½ 2003-2008 MTA.  All Rights Reserved.
 *
-*  Grand Theft Auto is © 2002-2003 Rockstar North
+*  Grand Theft Auto is ï¿½ 2002-2003 Rockstar North
 *
 *  THE FOLLOWING SOURCES ARE PART OF THE MULTI THEFT
 *  AUTO SOFTWARE DEVELOPMENT KIT AND ARE RELEASED AS
@@ -15,69 +15,60 @@
 *  PROVIDED WITH THIS PACKAGE.
 *
 *********************************************************/
-
 #include "ml_pgsql.h"
-#include "luaimports.h"
-#include <signal.h>
+#include "CFunctions.h"
 
-ILuaModuleManager10 *pModuleManager = NULL;
-bool ms_bInitWorked = false;
+std::unique_ptr<ILuaModuleManager10> g_pLuaModuleManager;
 
 // Initialisation function (module entrypoint)
-MTAEXPORT bool InitModule ( ILuaModuleManager10 *pManager, char *szModuleName, char *szAuthor, float *fVersion )
+MTAEXPORT bool InitModule(ILuaModuleManager10 *pManager, char *szModuleName, char *szAuthor, float *fVersion)
 {
-	pModuleManager = pManager;
+    g_pLuaModuleManager.reset(pManager);
 
 	// Set the module info
-	strncpy ( szModuleName, MODULE_NAME, MAX_INFO_LENGTH );
-	strncpy ( szAuthor, MODULE_AUTHOR, MAX_INFO_LENGTH );
+	strncpy(szModuleName, MODULE_NAME, MAX_INFO_LENGTH);
+	strncpy(szAuthor, MODULE_AUTHOR, MAX_INFO_LENGTH);
 	(*fVersion) = MODULE_VERSION;
 
-    if ( !ImportLua() )
+    if (!ImportLua())
     {
+        g_pLuaModuleManager.reset();
         return false;
     }
 
-    ms_bInitWorked = true;
 	return true;
 }
 
 
-MTAEXPORT void RegisterFunctions ( lua_State * luaVM )
+MTAEXPORT void RegisterFunctions(lua_State *luaVM)
 {
-    if ( !ms_bInitWorked )
-        return;
-
-	if ( pModuleManager && luaVM )
+	if (g_pLuaModuleManager.get() && luaVM)
 	{
         // Register functions
-        pModuleManager->RegisterFunction(luaVM, "pg_conn", CFunctions::pg_conn);
-        pModuleManager->RegisterFunction(luaVM, "pg_query", CFunctions::pg_query);
-        pModuleManager->RegisterFunction(luaVM, "pg_exec", CFunctions::pg_exec);
-        pModuleManager->RegisterFunction(luaVM, "pg_poll", CFunctions::pg_poll);
-        pModuleManager->RegisterFunction(luaVM, "pg_free", CFunctions::pg_free);
-        pModuleManager->RegisterFunction(luaVM, "pg_close", CFunctions::pg_free);
+        g_pLuaModuleManager->RegisterFunction(luaVM, "pg_conn", CFunctions::pg_conn);
+        g_pLuaModuleManager->RegisterFunction(luaVM, "pg_query", CFunctions::pg_query);
+        g_pLuaModuleManager->RegisterFunction(luaVM, "pg_exec", CFunctions::pg_exec);
+        g_pLuaModuleManager->RegisterFunction(luaVM, "pg_poll", CFunctions::pg_poll);
+        g_pLuaModuleManager->RegisterFunction(luaVM, "pg_free", CFunctions::pg_free);
+        g_pLuaModuleManager->RegisterFunction(luaVM, "pg_close", CFunctions::pg_free);
 	}
 }
 
 
-MTAEXPORT bool DoPulse ( void )
+MTAEXPORT bool DoPulse(void)
 {
-
 	return true;
 }
 
 
-MTAEXPORT void ResourceStopped ( lua_State * luaVM )
+MTAEXPORT void ResourceStopped(lua_State *luaVM)
 {
 
 }
 
 
-MTAEXPORT bool ShutdownModule ( void )
+MTAEXPORT bool ShutdownModule(void)
 {
-
-
-
+    g_pLuaModuleManager.reset();
 	return true;
 }
