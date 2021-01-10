@@ -73,3 +73,44 @@ local conn,err = pg_conn("postgresql://user:123qwe@127.0.03:5432/mydb?connect_ti
 ...
 pg_close(conn);
 ```
+## bool pg_tx_begin(userdata connection);
+Begin new transaction for current connection (cannot create subtransaction)
+
+**return** boolean
+```lua
+local conn,err = pg_conn("postgresql://user:123qwe@127.0.03:5432/mydb?connect_timeout=3");
+...
+pg_tx_begin(conn);
+local exec = pg_exec(conn, "INSERT INTO users (name, password, money) VALUES ($1,$2,$3)", "a man", "mypasswd", "13");
+local exec = pg_exec(conn, "INSERT INTO users (name, password, money) VALUES ($1,$2,$3)", "a woman", "somepass", "44");
+pg_tx_commit(conn);
+```
+## bool pg_tx_commit(userdata connection);
+Commit transaction for current connection
+
+**return** boolean
+```lua
+local conn,err = pg_conn("postgresql://user:123qwe@127.0.03:5432/mydb?connect_timeout=3");
+...
+pg_tx_begin(conn);
+local exec = pg_exec(conn, "INSERT INTO users (name, password, money) VALUES ($1,$2,$3)", "a man", "mypasswd", "13");
+local exec = pg_exec(conn, "INSERT INTO users (name, password, money) VALUES ($1,$2,$3)", "a woman", "somepass", "44");
+pg_tx_commit(conn);
+```
+## bool pg_tx_rollback(userdata connection);
+Rollback transaction for current connection
+
+**return** boolean
+```lua
+local conn,err = pg_conn("postgresql://user:123qwe@127.0.03:5432/mydb?connect_timeout=3");
+...
+pg_tx_begin(conn);
+local exec = pg_exec(conn, "INSERT INTO users (name, password, money) VALUES ($1,$2,$3)", "a man", "mypasswd", "13");
+local exec = pg_exec(conn, "INSERT INTO users (name, password, money) VALUES ($1,$2,$3)", "a woman", "somepass", "44");
+if (<state validation condition>) then
+   pg_tx_commit(conn);
+else 
+   pg_tx_rollback(conn);
+end
+```
+
