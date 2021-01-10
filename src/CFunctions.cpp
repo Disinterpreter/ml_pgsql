@@ -39,6 +39,7 @@ void _tx_safety_close(PGconn *connection)
         break;
     case _TX_OPENED:
         PGresult *res = PQexec(connection, "ROLLBACK");
+        _CURRENT_TX_STATES[connection] = _TX_CLOSED;
         break;
     case _TX_ROLLBACKED:
     case _TX_COMMITED:
