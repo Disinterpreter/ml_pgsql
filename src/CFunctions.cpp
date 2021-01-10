@@ -15,143 +15,113 @@
 *  PROVIDED WITH THIS PACKAGE.
 *
 *********************************************************/
-
+#include "ml_pgsql.h"
 #include "CFunctions.h"
 
-int CFunctions::pg_conn(lua_State* luaVM)
+LUA_FUNCTION_DEFINE(CFunctions::pg_conn)
 {
-    const char* str = luaL_checkstring(luaVM, 1);
-    PGconn* connection = PQconnectdb(str);
-    if ( (PQstatus(connection) != CONNECTION_OK))
+    LUA_FUNCTION_ASSERT("pg_conn", luaVM);
+    LUA_FUNCTION_ASSERT("pg_conn", lua_gettop(luaVM) == 1);
+
+    PGconn* connection = PQconnectdb(luaL_checkstring(luaVM, 1));
+    if ((PQstatus(connection) != CONNECTION_OK))
     {
-        char* errmsg = PQerrorMessage(connection);
-        PQfinish(connection);
-        lua_pushboolean(luaVM, 0);
-        lua_pushstring(luaVM, errmsg);
-        return 2;
+        LIBPQ_FINISH_AND_RETURN_ERROR(luaVM, connection);
     }
     else 
     {
         if (PQsetnonblocking(connection, 1) == 0) {
             lua_pushlightuserdata(luaVM, connection);
-            return 1;
+            return LUA_FUNCTION_SUCCESS;
         }
         else
         {
-            char* errmsg = PQerrorMessage(connection);
-            PQfinish(connection);
-            lua_pushboolean(luaVM, 0);
-            lua_pushstring(luaVM, errmsg);
-            return 2;
+            LIBPQ_FINISH_AND_RETURN_ERROR(luaVM, connection);
         }
-        
-        
     }
-   
 }
 
 
 int CFunctions::pg_query(lua_State* luaVM)
 {
-    void* conn = lua_touserdata(luaVM, 1);
-    if (PQstatus((PGconn*)conn) != CONNECTION_OK && PQsetnonblocking((PGconn*)conn, 1) == 0) {
-        char* errmsg = PQerrorMessage((PGconn*)conn);
-        lua_pushboolean(luaVM, 0);
-        lua_pushstring(luaVM, errmsg);
-        return 2;
+    LUA_FUNCTION_ASSERT("pg_query", luaVM);
+    LUA_FUNCTION_ASSERT("pg_query", lua_gettop(luaVM) > 1);
+
+    PGconn* connection = reinterpret_cast<PGconn*>(lua_touserdata(luaVM, 1));
+    LUA_FUNCTION_ASSERT("pg_query", connection);
+
+    if (PQstatus((PGconn*)connection) != CONNECTION_OK && PQsetnonblocking((PGconn*)connection, 1) == 0) {
+        LIBPQ_RETURN_ERROR(luaVM, connection);
     }
-    const char* str = luaL_checkstring(luaVM, 2);
-    PGresult* query;
+
+    libpq_query_t query_str = luaL_checkstring(luaVM, 2);
 
     lua_remove(luaVM, 1);
     lua_remove(luaVM, 1);
 
-    int totalArgs = lua_gettop(luaVM);
-
-
+    int args_count = lua_gettop(luaVM);
 
     std::vector<const char*> args{};
-    for (int i = totalArgs; i > 0; --i) {
+    for (int i = args_count; i > 0; --i) {
         args.push_back(luaL_checkstring(luaVM, i));
     }
 
+    PGresult* query_result = PQexecParams((PGconn*)connection, query_str.c_str(), args.size(), NULL, (char**)args.data(), NULL, NULL, 0);
 
-    query = PQexecParams((PGconn*)conn,
-        str,
-        totalArgs,       /* one param */
-        NULL,    /* let the backend deduce param type */
-        (char**)args.data(),
-        NULL,
-        NULL,
-        0);
-    if ( (PQresultStatus(query) != PGRES_COMMAND_OK) && (PQresultStatus(query) != PGRES_TUPLES_OK))
+    if ((PQresultStatus(query_result) != PGRES_COMMAND_OK) && (PQresultStatus(query_result) != PGRES_TUPLES_OK))
     {
-        lua_pushboolean(luaVM, 0);
-        lua_pushstring(luaVM, PQerrorMessage((PGconn*)conn));
-        PQclear(query);
-        return 2;
+        LIBPQ_CLEAR_AND_RETURN_ERROR(luaVM, connection, query_result);
     }
 
-
-
-    lua_pushlightuserdata(luaVM, query);
-    return 1;
+    lua_pushlightuserdata(luaVM, query_result);
+    return LUA_FUNCTION_SUCCESS;
 }
 
 int CFunctions::pg_exec(lua_State* luaVM)
 {
-    void* conn = lua_touserdata(luaVM, 1);
-    if (PQstatus((PGconn*)conn) != CONNECTION_OK && PQsetnonblocking((PGconn*)conn, 1) == 0) {
-        char* errmsg = PQerrorMessage((PGconn*)conn);
-        lua_pushboolean(luaVM, 0);
-        lua_pushstring(luaVM, errmsg);
-        return 2;
+    LUA_FUNCTION_ASSERT("pg_exec", luaVM);
+    LUA_FUNCTION_ASSERT("pg_exec", lua_gettop(luaVM) > 1);
+
+    PGconn* connection = reinterpret_cast<PGconn*>(lua_touserdata(luaVM, 1));
+    LUA_FUNCTION_ASSERT("pg_exec", connection);
+
+    if (PQstatus((PGconn*)connection) != CONNECTION_OK && PQsetnonblocking((PGconn*)connection, 1) == 0) {
+        LIBPQ_RETURN_ERROR(luaVM, connection);
     }
-    const char* str = luaL_checkstring(luaVM, 2);
-    PGresult* query;
+
+    libpq_query_t query_str = luaL_checkstring(luaVM, 2);
 
     lua_remove(luaVM, 1);
     lua_remove(luaVM, 1);
 
-    int totalArgs = lua_gettop(luaVM);
-
-
+    int args_count = lua_gettop(luaVM);
 
     std::vector<const char*> args{};
-    for (int i = totalArgs; i > 0; --i) {
+    for (int i = args_count; i > 0; --i) {
         args.push_back(luaL_checkstring(luaVM, i));
     }
 
+    PGresult* query_result = PQexecParams((PGconn*)connection, query_str.c_str(), args.size(), NULL, (char**)args.data(), NULL, NULL, 0);
 
-    query = PQexecParams((PGconn*)conn,
-        str,
-        totalArgs,       /* one param */
-        NULL,    /* let the backend deduce param type */
-        (char**)args.data(),
-        NULL,
-        NULL,
-        0);
-    if ((PQresultStatus(query) != PGRES_COMMAND_OK) && (PQresultStatus(query) != PGRES_TUPLES_OK))
+    if ((PQresultStatus(query_result) != PGRES_COMMAND_OK) && (PQresultStatus(query_result) != PGRES_TUPLES_OK))
     {
-        lua_pushboolean(luaVM, 0);
-        lua_pushstring(luaVM, PQerrorMessage((PGconn*)conn));
-        PQclear(query);
-        return 2;
+        LIBPQ_CLEAR_AND_RETURN_ERROR(luaVM, connection, query_result);
     }
 
-
-    PQclear(query);
+    PQclear(query_result);
     lua_pushboolean(luaVM, 1);
-    return 1;
+    return LUA_FUNCTION_SUCCESS;
 }
 int CFunctions::pg_poll(lua_State* luaVM)
 {
-    void* argquery = lua_touserdata(luaVM, 1);
-    
-    PGresult* query = (PGresult*)argquery;
-    int ncols = PQnfields(query);
-    int nrows = PQntuples(query);
+    LUA_FUNCTION_ASSERT("pg_poll", luaVM);
+    LUA_FUNCTION_ASSERT("pg_poll", lua_gettop(luaVM) == 1);
 
+    PGresult *query_result = reinterpret_cast<PGresult*>(lua_touserdata(luaVM, 1));
+    LUA_FUNCTION_ASSERT("pg_poll", query_result);
+    
+    int ncols = PQnfields(query_result);
+    int nrows = PQntuples(query_result);
 
     lua_newtable(luaVM);
     for (int i = 0; i < nrows; i++)
@@ -159,38 +129,44 @@ int CFunctions::pg_poll(lua_State* luaVM)
         lua_newtable(luaVM);
         for (int coloumn = 0; coloumn < ncols; coloumn++)
         {
-
-            char* colname = PQfname(query, coloumn);
+            char* colname = PQfname(query_result, coloumn);
             lua_pushstring(luaVM, colname);
-            char* dataname = PQgetvalue(query, i, coloumn);
+            char* dataname = PQgetvalue(query_result, i, coloumn);
             lua_pushstring(luaVM, dataname);
             lua_settable(luaVM, -3);
         }
     }
-    //lua_settable(luaVM, -3);
-    PQclear(query);
-    return 1;
+
+    PQclear(query_result);
+    return LUA_FUNCTION_SUCCESS;
 }
 
 int CFunctions::pg_free(lua_State* luaVM)
 {
-    void* argquery = lua_touserdata(luaVM, 1);
-    PGresult* query = (PGresult*)argquery;
-    PQclear(query);
+    LUA_FUNCTION_ASSERT("pg_free", luaVM);
+    LUA_FUNCTION_ASSERT("pg_free", lua_gettop(luaVM) == 1);
+
+    PGresult* query_result = reinterpret_cast<PGresult*>(lua_touserdata(luaVM, 1));
+    LUA_FUNCTION_ASSERT("pg_free", query_result);
+
+    PQclear(query_result);
     lua_pushboolean(luaVM, 1);
-    return 1;
+    return LUA_FUNCTION_SUCCESS;
 }
 
 int CFunctions::pg_close(lua_State* luaVM)
 {
-    void* conn = lua_touserdata(luaVM, 1);
-    if (PQstatus((PGconn*)conn) != CONNECTION_OK && PQsetnonblocking((PGconn*)conn, 1) == 0) {
-        char* errmsg = PQerrorMessage((PGconn*)conn);
-        lua_pushboolean(luaVM, 0);
-        lua_pushstring(luaVM, errmsg);
-        return 2;
+    LUA_FUNCTION_ASSERT("pg_close", luaVM);
+    LUA_FUNCTION_ASSERT("pg_close", lua_gettop(luaVM) == 1);
+
+    PGconn* connection = reinterpret_cast<PGconn*>(lua_touserdata(luaVM, 1));
+    LUA_FUNCTION_ASSERT("pg_close", connection);
+
+    if (PQstatus((PGconn*)connection) != CONNECTION_OK && PQsetnonblocking((PGconn*)connection, 1) == 0) {
+        LIBPQ_RETURN_ERROR(luaVM, connection);
     }
-    PQfinish((PGconn*)conn);
+
+    PQfinish((PGconn*)connection);
     lua_pushboolean(luaVM, 1);
-    return 1;
+    return LUA_FUNCTION_SUCCESS;
 }

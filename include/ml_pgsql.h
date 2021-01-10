@@ -15,45 +15,48 @@
 *  PROVIDED WITH THIS PACKAGE.
 *
 *********************************************************/
+#pragma once
 
-#ifndef _MLSOCK_H
-#define _MLSOCK_H
-
-// Disable Visual Studio warnings
-#ifdef WIN32
-    #pragma warning (disable : 4267) // DISABLE: conversion from 'size_t' to 'int', possible loss of data
-    #pragma warning (disable : 4996) // DISABLE: 'strcpy': This function or variable may be unsafe.
-    #pragma warning (disable : 4244) // DISABLE: conversion from 'SOCKET' to 'int', possible loss of data
+/* Remove MSVC warnings */
+#ifdef _MSC_VER
+#pragma warning(disable : 4267)
+#pragma warning(disable : 4996)
+#define _CRT_SECURE_NO_WARNINGS
 #endif
 
-/** MODULE SPECIFIC INFORMATION **/
-#define MODULE_NAME			"Postgres SQL module"
-#define	MODULE_AUTHOR		"Disi"
-#define MODULE_VERSION		0.5f
+/* Module basic configuration */
+#define MODULE_NAME		"Postgre.SQL"
+#define MODULE_AUTHOR	"Disi"
+#define MODULE_VERSION	0.5f
 
-// Include default MTA module SDK includes
-#include "Common.h"
-#include "CFunctions.h"
+/* MTA-SA Module SDK */
+#include "include/Common.h"
 #include "include/ILuaModuleManager.h"
-#include "include/CLuaArguments.h"
+#include "include/lua.h"
 
-// Set the using namespace to std, so we don't need the annoying std:: anymore
-using namespace std;
+/* Function-related return values */
+#define LUA_FUNCTION_SUCCESS            (1)
+#define LUA_FUNCTION_FAILURE            (2)
 
-// Function for making sure a pointer has a value before deleting it; possibly prevents crashes
-#define SAFE_DELETE(p) { if (p) { delete (p); (p) = NULL; } }
+/* Function-related defines for easier working with API */
+#define LUA_FUNCTION_DECLARE(function)  static int function(lua_State* luaVM)
+#define LUA_FUNCTION_DEFINE(function)   int function(lua_State* luaVM)
+#define LUA_FUNCTION_ASSERT(function, expression) { if(!(expression)) { lua_pushboolean(luaVM, 0); lua_pushstring(luaVM, "Assertation failed in function " function ": " #expression); return LUA_FUNCTION_FAILURE; } }
 
-// List item removal
-template < class TL, class T >
-void ListRemove ( TL& itemList, const T& item )
-{
-    typename TL ::iterator it = itemList.begin ();
-    for ( ; it != itemList.end () ; ++it )
-        if ( item == *it )
-        {
-            itemList.erase ( it );
-            break;
-        }
-}
+/* libpq-related errors function interaction */
+#define LIBPQ_FINISH_AND_RETURN_ERROR(luavm, connection) { char* errmsg = PQerrorMessage(connection); PQfinish(connection); lua_pushboolean(luavm, 0); lua_pushstring(luavm, errmsg); return LUA_FUNCTION_FAILURE; }
+#define LIBPQ_CLEAR_AND_RETURN_ERROR(luavm, connection, result) { lua_pushboolean(luavm, 0); lua_pushstring(luavm, PQerrorMessage(connection)); PQclear(result); return LUA_FUNCTION_FAILURE; }
+#define LIBPQ_RETURN_ERROR(luavm, connection) { lua_pushboolean(luavm, 0); lua_pushstring(luavm, PQerrorMessage(connection)); return LUA_FUNCTION_FAILURE; }
 
-#endif
+/* LUA imports */
+#include "luaimports.h"
+
+/* Standard Library useful includes */
+#include <memory> // smart pointers
+#include <string> // std::string
+
+/* libpq SDK */
+#include <libpq-fe.h>
+
+/* Define types here in case we need to change them in the future */
+typedef std::string libpq_query_t;
