@@ -4,9 +4,9 @@
 *
 *  ml_base, External lua add-on module
 *
-*  Copyright © 2003-2008 MTA.  All Rights Reserved.
+*  Copyright ï¿½ 2003-2008 MTA.  All Rights Reserved.
 *
-*  Grand Theft Auto is © 2002-2003 Rockstar North
+*  Grand Theft Auto is ï¿½ 2002-2003 Rockstar North
 *
 *  THE FOLLOWING SOURCES ARE PART OF THE MULTI THEFT
 *  AUTO SOFTWARE DEVELOPMENT KIT AND ARE RELEASED AS
@@ -33,6 +33,11 @@ extern ILuaModuleManager10 *pModuleManager;
 class CFunctions
 {
 public:
+    // transaction functions
+    static int pg_tx_begin(lua_State* luaVM);
+    static int pg_tx_rollback(lua_State* luaVM);
+    static int pg_tx_commit(lua_State* luaVM);
+
     static int pg_conn(lua_State* luaVM);
     static int pg_query(lua_State* luaVM);
     static int pg_poll(lua_State* luaVM);
