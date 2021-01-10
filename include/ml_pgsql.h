@@ -44,7 +44,7 @@
 #define LUA_FUNCTION_ASSERT(function, expression) { if(!(expression)) { lua_pushboolean(luaVM, 0); lua_pushstring(luaVM, "Assertation failed in function " function ": " #expression); return LUA_FUNCTION_FAILURE; } }
 
 /* libpq-related errors function interaction */
-#define LIBPQ_FINISH_AND_RETURN_ERROR(luavm, connection) { char* errmsg = PQerrorMessage(connection); PQfinish(connection); lua_pushboolean(luavm, 0); lua_pushstring(luavm, errmsg); return LUA_FUNCTION_FAILURE; }
+#define LIBPQ_FINISH_AND_RETURN_ERROR(luavm, connection) { char* errmsg = PQerrorMessage(connection); lua_pushboolean(luavm, 0); lua_pushstring(luavm, errmsg); PQfinish(connection); return LUA_FUNCTION_FAILURE; }
 #define LIBPQ_CLEAR_AND_RETURN_ERROR(luavm, connection, result) { lua_pushboolean(luavm, 0); lua_pushstring(luavm, PQerrorMessage(connection)); PQclear(result); return LUA_FUNCTION_FAILURE; }
 #define LIBPQ_RETURN_ERROR(luavm, connection) { lua_pushboolean(luavm, 0); lua_pushstring(luavm, PQerrorMessage(connection)); return LUA_FUNCTION_FAILURE; }
 

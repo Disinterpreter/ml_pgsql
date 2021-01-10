@@ -336,3 +336,7 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+# Module related
+Build/
+Bin/
