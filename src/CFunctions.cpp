@@ -17,6 +17,7 @@
 *********************************************************/
 
 #include "CFunctions.h"
+#include <unordered_map>
 
 #define _TX_CLOSED 1
 #define _TX_OPENED 2
@@ -28,11 +29,11 @@
     3 - has rollbacked transaction
     4 - has commited transaction
 */
-static int _CURRENT_TX_STATE = _TX_CLOSED;
+std::unordered_map<PGconn*, int> _CURRENT_TX_STATES = {{}};
 
 void _tx_safety_close(PGconn *connection)
 {
-    switch (_CURRENT_TX_STATE)
+    switch (_CURRENT_TX_STATES[connection])
     {
     case _TX_CLOSED:
         break;
@@ -41,7 +42,7 @@ void _tx_safety_close(PGconn *connection)
         break;
     case _TX_ROLLBACKED:
     case _TX_COMMITED:
-        _CURRENT_TX_STATE = _TX_CLOSED;
+        _CURRENT_TX_STATES[connection] = _TX_CLOSED;
         break;
     default:
         break;
@@ -63,7 +64,7 @@ int CFunctions::pg_tx_begin(lua_State *luaVM)
         return 2;
     }
 
-    switch (_CURRENT_TX_STATE)
+    switch (_CURRENT_TX_STATES[conn])
     {
     case _TX_CLOSED:
     {
@@ -77,7 +78,7 @@ int CFunctions::pg_tx_begin(lua_State *luaVM)
         }
 
         lua_pushboolean(luaVM, true);
-        _CURRENT_TX_STATE = _TX_OPENED;
+        _CURRENT_TX_STATES[conn] = _TX_OPENED;
         return 1;
         break;
     }
@@ -111,7 +112,7 @@ int CFunctions::pg_tx_commit(lua_State *luaVM)
         return 2;
     }
 
-    switch (_CURRENT_TX_STATE)
+    switch (_CURRENT_TX_STATES[conn])
     {
     case _TX_OPENED:
     {
@@ -125,7 +126,7 @@ int CFunctions::pg_tx_commit(lua_State *luaVM)
         }
 
         lua_pushboolean(luaVM, true);
-        _CURRENT_TX_STATE = _TX_COMMITED;
+        _CURRENT_TX_STATES[conn] = _TX_COMMITED;
         return 1;
         break;
     }
@@ -159,7 +160,7 @@ int CFunctions::pg_tx_rollback(lua_State *luaVM)
         return 2;
     }
 
-    switch (_CURRENT_TX_STATE)
+    switch (_CURRENT_TX_STATES[conn])
     {
     case _TX_OPENED:
     {
@@ -173,7 +174,7 @@ int CFunctions::pg_tx_rollback(lua_State *luaVM)
         }
 
         lua_pushboolean(luaVM, true);
-        _CURRENT_TX_STATE = _TX_ROLLBACKED;
+        _CURRENT_TX_STATES[conn] = _TX_ROLLBACKED;
         return 1;
         break;
     }
@@ -212,6 +213,7 @@ int CFunctions::pg_conn(lua_State *luaVM)
         if (PQsetnonblocking(connection, 1) == 0)
         {
             lua_pushlightuserdata(luaVM, connection);
+            _CURRENT_TX_STATES[connection] = _TX_CLOSED;
             return 1;
         }
         else
