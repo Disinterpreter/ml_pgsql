@@ -194,3 +194,44 @@ int CFunctions::pg_close(lua_State* luaVM)
     lua_pushboolean(luaVM, 1);
     return 1;
 }
+
+int CFunctions::async_call(lua_State* luaVM, void* conn)
+{
+
+    int totalArgs = lua_gettop(luaVM);
+    lua_pop(luaVM, 1);
+    lua_pushlightuserdata(luaVM, (PGconn*)conn);
+    lua_call(luaVM, 1, 0);
+
+    return 0;
+}
+
+int CFunctions::pg_aquery(lua_State* luaVM)
+{
+    void* conn = lua_touserdata(luaVM, 1);
+    // lua_remove(luaVM, 1);
+    int totalArgs = lua_gettop(luaVM);
+    // lua_pushlightuserdata(luaVM, conn);
+
+    // THERE WAS ASYNC QUERY
+    auto f = std::async(std::launch::async, async_call, luaVM, conn);
+    // lua_cpcall(luaVM, fnc, NULL);
+
+    lua_pushboolean(luaVM, 1);
+    return 1;
+}
+
+int CFunctions::pg_aresult(lua_State* luaVM)
+{
+    void* conn = lua_touserdata(luaVM, 1);
+    if (PQstatus((PGconn*)conn) != CONNECTION_OK && PQsetnonblocking((PGconn*)conn, 1) == 0) {
+        char* errmsg = PQerrorMessage((PGconn*)conn);
+        lua_pushboolean(luaVM, 0);
+        lua_pushstring(luaVM, errmsg);
+        return 2;
+    }
+    PGresult* res = PQgetResult((PGconn*)conn);
+    lua_pushstring(luaVM, PQresStatus(PQresultStatus(res)));
+    lua_pushlightuserdata(luaVM, res);
+    return 2;
+}

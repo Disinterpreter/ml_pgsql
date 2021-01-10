@@ -26,6 +26,7 @@ class CFunctions;
 
 #include "ml_pgsql.h"
 #include "include/ILuaModuleManager.h"
+#include <future>
 #pragma comment(lib, "./lib/x64/libpq.lib")
 
 extern ILuaModuleManager10 *pModuleManager;
@@ -39,5 +40,9 @@ public:
     static int pg_free(lua_State* luaVM);
     static int pg_exec(lua_State* luaVM);
     static int pg_close(lua_State* luaVM);
+    static int pg_aquery(lua_State* luaVM);
+    static int pg_aresult(lua_State* luaVM);
+private:
+    static int async_call(lua_State* luaVM, void* conn);
 };
 #endif

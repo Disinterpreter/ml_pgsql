@@ -57,6 +57,8 @@ MTAEXPORT void RegisterFunctions ( lua_State * luaVM )
         pModuleManager->RegisterFunction(luaVM, "pg_poll", CFunctions::pg_poll);
         pModuleManager->RegisterFunction(luaVM, "pg_free", CFunctions::pg_free);
         pModuleManager->RegisterFunction(luaVM, "pg_close", CFunctions::pg_free);
+        pModuleManager->RegisterFunction(luaVM, "pg_aquery", CFunctions::pg_aquery);
+        pModuleManager->RegisterFunction(luaVM, "pg_aresult", CFunctions::pg_aresult);
 	}
 }
 
