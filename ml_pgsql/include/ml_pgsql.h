@@ -17,13 +17,6 @@
 *********************************************************/
 #pragma once
 
-/* Remove MSVC warnings */
-#ifdef _MSC_VER
-#pragma warning(disable : 4267)
-#pragma warning(disable : 4996)
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-
 #ifdef __linux__
 #include <cstring>
 #endif
@@ -38,19 +31,11 @@
 #include "ILuaModuleManager.h"
 #include "lua/lua.h"
 
-/* Function-related return values */
-#define LUA_FUNCTION_SUCCESS            (1)
-#define LUA_FUNCTION_FAILURE            (2)
-
 /* Function-related defines for easier working with API */
 #define LUA_FUNCTION_DECLARE(function)  static int function(lua_State* luaVM)
-#define LUA_FUNCTION_DEFINE(function)   int function(lua_State* luaVM)
-#define LUA_FUNCTION_ASSERT(function, expression) { if(!(expression)) { lua_pushboolean(luaVM, 0); lua_pushstring(luaVM, "Assertation failed in function " function ": " #expression); return LUA_FUNCTION_FAILURE; } }
+#define LUA_FUNCTION_ASSERT(function, expression) { if(!(expression)) { lua_pushboolean(luaVM, 0); lua_pushstring(luaVM, "Assertation failed in function " function ": " #expression); return 2; } }
 
-/* libpq-related errors function interaction */
-#define LIBPQ_FINISH_AND_RETURN_ERROR(luavm, connection) { char* errmsg = PQerrorMessage(connection); lua_pushboolean(luavm, 0); lua_pushstring(luavm, errmsg); PQfinish(connection); return LUA_FUNCTION_FAILURE; }
-#define LIBPQ_CLEAR_AND_RETURN_ERROR(luavm, connection, result) { lua_pushboolean(luavm, 0); lua_pushstring(luavm, PQerrorMessage(connection)); PQclear(result); return LUA_FUNCTION_FAILURE; }
-#define LIBPQ_RETURN_ERROR(luavm, connection) { lua_pushboolean(luavm, 0); lua_pushstring(luavm, PQerrorMessage(connection)); return LUA_FUNCTION_FAILURE; }
+#define SAFE_DELETE(ptr) { delete ptr; ptr = nullptr; }
 
 /* LUA imports */
 #include "lua/luaimports.h"

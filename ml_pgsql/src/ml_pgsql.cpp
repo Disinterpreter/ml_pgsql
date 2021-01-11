@@ -17,13 +17,16 @@
 *********************************************************/
 #include "ml_pgsql.h"
 #include "CFunctions.h"
+#include "CPostgresManager.h"
 
 std::unique_ptr<ILuaModuleManager10> g_pLuaModuleManager;
+std::unique_ptr<CPostgresManager> g_pPostgresManager;
 
 // Initialisation function (module entrypoint)
 MTAEXPORT bool InitModule(ILuaModuleManager10 *pManager, char *szModuleName, char *szAuthor, float *fVersion)
 {
     g_pLuaModuleManager.reset(pManager);
+    g_pPostgresManager.reset(new CPostgresManager());
 
 	// Set the module info
 	strncpy(szModuleName, MODULE_NAME, MAX_INFO_LENGTH);
@@ -50,7 +53,7 @@ MTAEXPORT void RegisterFunctions(lua_State *luaVM)
         g_pLuaModuleManager->RegisterFunction(luaVM, "pg_exec", CFunctions::pg_exec);
         g_pLuaModuleManager->RegisterFunction(luaVM, "pg_poll", CFunctions::pg_poll);
         g_pLuaModuleManager->RegisterFunction(luaVM, "pg_free", CFunctions::pg_free);
-        g_pLuaModuleManager->RegisterFunction(luaVM, "pg_close", CFunctions::pg_free);
+        g_pLuaModuleManager->RegisterFunction(luaVM, "pg_close", CFunctions::pg_close);
 	}
 }
 
@@ -63,12 +66,15 @@ MTAEXPORT bool DoPulse(void)
 
 MTAEXPORT void ResourceStopped(lua_State *luaVM)
 {
-
+    g_pPostgresManager->CloseAllConnections(luaVM);
 }
 
 
 MTAEXPORT bool ShutdownModule(void)
 {
+    g_pPostgresManager->CloseAllConnections();
+
     g_pLuaModuleManager.reset();
+    g_pPostgresManager.reset();
 	return true;
 }

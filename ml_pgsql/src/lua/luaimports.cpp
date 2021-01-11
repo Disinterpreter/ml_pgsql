@@ -31,10 +31,10 @@
 #include <stdarg.h>
 #include "Common.h"
 #include "ILuaModuleManager.h"
-#include "lauxlib.h"
-#include "luaconf.h"
-#include "lua.h"
-#include "lualib.h"
+#include "lua/lauxlib.h"
+#include "lua/luaconf.h"
+#include "lua/lua.h"
+#include "lua/lualib.h"
 
 /* This file extracts the lua function addresses from the server core to avoid lua gc crashes */
 
