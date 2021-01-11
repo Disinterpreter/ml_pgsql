@@ -4,6 +4,8 @@ solution "ml_pgsql"
 	targetdir "Bin/%{cfg.buildcfg}"
 	platforms { "x86", "x64" }
 	
+	targetprefix ""
+	
 	pic "On"
 	symbols "On"
 
@@ -15,5 +17,5 @@ solution "ml_pgsql"
 
 	filter "configurations:Release"
 		optimize "On"
-	
+		
 	include "ml_pgsql"
