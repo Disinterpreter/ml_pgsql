@@ -4,9 +4,9 @@
 *
 *  ml_base, External lua add-on module
 *
-*  Copyright © 2003-2008 MTA.  All Rights Reserved.
+*  Copyright ï¿½ 2003-2008 MTA.  All Rights Reserved.
 *
-*  Grand Theft Auto is © 2002-2003 Rockstar North
+*  Grand Theft Auto is ï¿½ 2002-2003 Rockstar North
 *
 *  THE FOLLOWING SOURCES ARE PART OF THE MULTI THEFT
 *  AUTO SOFTWARE DEVELOPMENT KIT AND ARE RELEASED AS
@@ -24,10 +24,14 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#ifdef __linux__
+#include <cstring>
+#endif
+
 /* Module basic configuration */
-#define MODULE_NAME		"Postgre.SQL"
-#define MODULE_AUTHOR	"Disi"
-#define MODULE_VERSION	0.5f
+#define MODULE_NAME		"PostgreSQL"
+#define MODULE_AUTHOR	"Disi and xLuxy"
+#define MODULE_VERSION	0.6f
 
 /* MTA-SA Module SDK */
 #include "include/Common.h"
@@ -56,7 +60,7 @@
 #include <string> // std::string
 
 /* libpq SDK */
-#include <libpq-fe.h>
+#include <libpq/libpq-fe.h>
 
 /* Define types here in case we need to change them in the future */
 typedef std::string libpq_query_t;
