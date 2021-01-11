@@ -29,4 +29,4 @@ project "ml_pgsql"
 		links { "pq" }
 	
 	filter "system:not linux"
-		excludes { "include/luaimports.h", "src/luaimports.cpp" }
+		excludes { "include/lua/luaimports.h", "src/lua/luaimports.cpp" }

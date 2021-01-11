@@ -34,9 +34,9 @@
 #define MODULE_VERSION	0.6f
 
 /* MTA-SA Module SDK */
-#include "include/Common.h"
-#include "include/ILuaModuleManager.h"
-#include "include/lua.h"
+#include "Common.h"
+#include "ILuaModuleManager.h"
+#include "lua/lua.h"
 
 /* Function-related return values */
 #define LUA_FUNCTION_SUCCESS            (1)
@@ -53,7 +53,7 @@
 #define LIBPQ_RETURN_ERROR(luavm, connection) { lua_pushboolean(luavm, 0); lua_pushstring(luavm, PQerrorMessage(connection)); return LUA_FUNCTION_FAILURE; }
 
 /* LUA imports */
-#include "luaimports.h"
+#include "lua/luaimports.h"
 
 /* Standard Library useful includes */
 #include <memory> // smart pointers

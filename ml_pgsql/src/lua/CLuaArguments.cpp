@@ -16,7 +16,7 @@
 *
 *********************************************************/
 
-#include "CLuaArguments.h"
+#include "lua/CLuaArguments.h"
 #include <assert.h>
 
 CLuaArguments::CLuaArguments ( const CLuaArguments& Arguments )
