@@ -26,8 +26,7 @@ CPostgresConnection::CPostgresConnection(lua_State* pLuaVM, const char* szConnec
 
 CPostgresConnection::~CPostgresConnection()
 {
-    if (m_pConnection)
-        PQfinish(m_pConnection);
+    PQfinish(m_pConnection);
 }
 
 PGresult* CPostgresConnection::Query(lua_State* luaVM)

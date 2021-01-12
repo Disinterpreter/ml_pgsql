@@ -25,15 +25,22 @@ int CFunctions::pg_conn(lua_State* luaVM)
 
     CPostgresConnection* pConn = CPostgresManager::NewConnection(luaVM);
     
-    if (pConn->IsConnected())
+    if (pConn && pConn->IsConnected())
     {
         lua_pushlightuserdata(luaVM, pConn);
         return 1;
     }
+    else if(pConn)
+    {
+        lua_pushboolean(luaVM, false);
+        lua_pushstring(luaVM, pConn->GetLastErrorMessage());
+
+        SAFE_DELETE(pConn);
+        return 2;
+    }
     
     lua_pushboolean(luaVM, false);
-    lua_pushstring(luaVM, pConn->GetLastErrorMessage());
-    return 2;
+    return 1;
 }
 
 
