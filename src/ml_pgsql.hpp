@@ -27,9 +27,9 @@
 #define MODULE_VERSION	0.6f
 
 /* MTA-SA Module SDK */
-#include "Common.h"
-#include "ILuaModuleManager.h"
-#include "lua/lua.h"
+#include "Common.hpp"
+#include "ILuaModuleManager.hpp"
+#include <lua/lua.h>
 
 /* Function-related defines for easier working with API */
 #define LUA_FUNCTION_DECLARE(function)  static int function(lua_State* luaVM)
@@ -38,7 +38,7 @@
 #define SAFE_DELETE(ptr) { delete ptr; ptr = nullptr; }
 
 /* LUA imports */
-#include "lua/luaimports.h"
+#include <lua/luaimports.h>
 
 /* Standard Library useful includes */
 #include <memory> // smart pointers

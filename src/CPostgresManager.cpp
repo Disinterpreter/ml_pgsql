@@ -15,7 +15,7 @@
 *  PROVIDED WITH THIS PACKAGE.
 *
 *********************************************************/
-#include "CPostgresManager.h"
+#include "CPostgresManager.hpp"
 
 
 CPostgresManager::CPostgresManager()

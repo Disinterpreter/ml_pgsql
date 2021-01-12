@@ -7,6 +7,9 @@ I accept any support regarding the module development. Feel free to make PRs and
 # Installation	
 Information about **Installation** provided on the **[Releases](https://github.com/Disinterpreter/ml_pgsql/releases)** page.
 
+# Build from source
+Check our [builds](BUILD.md) file.
+
 # Functions	
 ## pg_conn function
 ### Syntax

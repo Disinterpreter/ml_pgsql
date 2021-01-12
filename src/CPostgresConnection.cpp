@@ -16,7 +16,7 @@
 *
 *********************************************************/
 
-#include "CPostgresConnection.h"
+#include "CPostgresConnection.hpp"
 
 CPostgresConnection::CPostgresConnection(lua_State* pLuaVM, const char* szConnectionInfo) : m_pLuaVM{pLuaVM}
 {
