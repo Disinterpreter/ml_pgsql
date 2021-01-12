@@ -1,21 +1,53 @@
-solution "ml_pgsql"
+workspace "ml_pgsql"
 	configurations { "Debug", "Release" }
-	location ( "Build" )
-	targetdir "Bin/%{cfg.platform}/%{cfg.buildcfg}"
-	platforms { "x86", "x64" }
-	
-	targetprefix ""
-	
-	pic "On"
-	symbols "On"
+	location { "build" }
 
-	filter "system:windows"
-		defines { "WINDOWS", "WIN32" }
+project "ml_pgsql"
+	kind "SharedLib"
+	language "C++"
 
-	filter "configurations:Debug"
-		defines { "DEBUG" }
+	cppdialect "C++17"
+	files { "src/**.cpp" }
 
-	filter "configurations:Release"
-		optimize "On"
-		
-	include "ml_pgsql"
+	filter { "platforms:x86" }
+		libdirs {
+			"vendor/lua/x86"
+		}
+
+		filter { "system:windows" }
+			defines { "WINDOWS", "WIN32" }
+			libdirs { "vendor/libpq/lib/x86" }
+			links { "lua5.1.lib", "libpq.lib" }
+
+		filter { "system:linux" }
+			defines { "LINUX" }
+			links { "pq" }
+
+	filter { "platforms:x64" }
+		libdirs {
+			"vendor/lua/x64"
+		}
+
+		filter { "system:windows" }
+			defines { "WINDOWS", "WIN32" }
+			libdirs { "vendor/libpq/lib/x64" }
+			links { "lua5.1.lib", "libpq.lib" }
+
+		filter { "system:linux" }
+			defines { "LINUX" }
+			links { "pq" }
+
+	includedirs {
+		"src/",
+		"vendor/lua/include",
+		"vendor/libpq/include"
+	}
+
+	filter { "configurations:Debug" }
+        defines { "DEBUG" }
+        symbols "On"
+
+    filter { "configurations:Release" }
+        defines { "NDEBUG" }
+        optimize "On"
+
