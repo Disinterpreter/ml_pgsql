@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "ml_pgsql.h"
+#include "ml_pgsql.hpp"
 
 class CPostgresConnection
 {

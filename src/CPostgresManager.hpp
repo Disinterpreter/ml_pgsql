@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include "ml_pgsql.h"
-#include "CPostgresConnection.h"
+#include "ml_pgsql.hpp"
+#include "CPostgresConnection.hpp"
 
 #include <vector>
 

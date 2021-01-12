@@ -15,9 +15,9 @@
 *  PROVIDED WITH THIS PACKAGE.
 *
 *********************************************************/
-#include "ml_pgsql.h"
-#include "CFunctions.h"
-#include "CPostgresManager.h"
+#include "ml_pgsql.hpp"
+#include "CFunctions.hpp"
+#include "CPostgresManager.hpp"
 
 std::unique_ptr<ILuaModuleManager10> g_pLuaModuleManager;
 std::unique_ptr<CPostgresManager> g_pPostgresManager;

@@ -15,9 +15,9 @@
 *  PROVIDED WITH THIS PACKAGE.
 *
 *********************************************************/
-#include "ml_pgsql.h"
-#include "CFunctions.h"
-#include "CPostgresManager.h"
+#include "ml_pgsql.hpp"
+#include "CFunctions.hpp"
+#include "CPostgresManager.hpp"
 
 int CFunctions::pg_conn(lua_State* luaVM)
 {

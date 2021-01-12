@@ -16,12 +16,7 @@
 *
 *********************************************************/
 
-extern "C"
-{
-    #include "lua/lua.h"
-    #include "lua/lualib.h"
-    #include "lua/lauxlib.h"
-}
+#include <lua/lua.hpp>
 
 #ifdef WIN32
 	#define MTAEXPORT extern "C" __declspec(dllexport)
