@@ -1,7 +1,7 @@
 solution "ml_pgsql"
 	configurations { "Debug", "Release" }
 	location ( "Build" )
-	targetdir "Bin/%{cfg.buildcfg}"
+	targetdir "Bin/%{cfg.platform}/%{cfg.buildcfg}"
 	platforms { "x86", "x64" }
 	
 	targetprefix ""
