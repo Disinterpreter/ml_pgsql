@@ -14,15 +14,27 @@ CPostgresConnection::~CPostgresConnection()
 
 PGresult* CPostgresConnection::Query(lua_State* luaVM)
 {
-    libpq_query_t query_str = luaL_checkstring(luaVM, 2);
 
-    lua_remove(luaVM, 1);
-    lua_remove(luaVM, 1);
-
+    std::map<int, const char*> mmArgsAndTypes;
     int args_count = lua_gettop(luaVM);
+    for (int i = 1; i <= args_count; i++) {
+        const char* namearg = lua_typename(luaVM, lua_type(luaVM, i));
+        mmArgsAndTypes.insert({ i, namearg });
+    }
+
+    lua_remove(luaVM, 1);
+    if (strcmp(mmArgsAndTypes[2], "function") == 0) {
+        lua_remove(luaVM, 1);
+        if (strcmp(mmArgsAndTypes[3], "table") == 0) {
+            lua_remove(luaVM, 1);
+        }
+    }
+
+    libpq_query_t query_str = luaL_checkstring(luaVM, 1);
+    lua_remove(luaVM, 1);
 
     std::vector<const char*> args{};
-    for (int i = args_count; i > 0; --i) {
+    for (int i = lua_gettop(luaVM); i > 0; --i) {
         args.push_back(luaL_checkstring(luaVM, i));
     }
 

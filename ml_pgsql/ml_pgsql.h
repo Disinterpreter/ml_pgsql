@@ -27,6 +27,7 @@
 /* Standard Library useful includes */
 #include <memory> // smart pointers
 #include <string> // std::string
+#include <map>
 
 /* libpq SDK */
 #include <libpq/libpq-fe.h>
