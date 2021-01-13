@@ -8,8 +8,8 @@ project "ml_pgsql"
 	libdirs { "../libs" }
 
 	vpaths {
-		["Headers/*"] = "include/**.h",
-		["Sources/*"] = "src/**.cpp",
+		["Headers/*"] = "**.h",
+		["Sources/*"] = "**.cpp",
 		["*"] = "premake5.lua"
 	}
 
@@ -29,4 +29,4 @@ project "ml_pgsql"
 		links { "pq" }
 	
 	filter "system:not linux"
-		excludes { "include/lua/luaimports.h", "src/lua/luaimports.cpp" }
+		excludes { "lua/luaimports.h", "lua/luaimports.cpp" }
