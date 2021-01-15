@@ -12,21 +12,16 @@ CPostgresConnection::~CPostgresConnection()
     PQfinish(m_pConnection);
 }
 
-PGresult* CPostgresConnection::Query(lua_State* luaVM)
+PGresult* CPostgresConnection::Query(std::string sQuery)
 {
-    libpq_query_t query_str = luaL_checkstring(luaVM, 2);
-
-    lua_remove(luaVM, 1);
-    lua_remove(luaVM, 1);
-
-    int args_count = lua_gettop(luaVM);
+    //int args_count = lua_gettop(luaVM);
 
     std::vector<const char*> args{};
-    for (int i = args_count; i > 0; --i) {
+    /*for (int i = args_count; i > 0; --i) {
         args.push_back(luaL_checkstring(luaVM, i));
-    }
+    }*/
 
-    PGresult* pResult = PQexecParams(m_pConnection, query_str.c_str(), args.size(), NULL, (char**)args.data(), NULL, NULL, 0);
+    PGresult* pResult = PQexecParams(m_pConnection, sQuery.c_str(), args.size(), NULL, (char**)args.data(), NULL, NULL, 0);
 
     if (pResult && PQresultStatus(pResult) == PGRES_TUPLES_OK)
     {
@@ -40,8 +35,7 @@ bool CPostgresConnection::Exec(lua_State* luaVM)
 {
     libpq_query_t query_str = luaL_checkstring(luaVM, 2);
 
-    lua_remove(luaVM, 1);
-    lua_remove(luaVM, 1);
+    lua_pop(luaVM, 1);
 
     int args_count = lua_gettop(luaVM);
 

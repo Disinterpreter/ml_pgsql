@@ -18,6 +18,6 @@ public:
     bool IsConnected() { return PQstatus(m_pConnection) == CONNECTION_OK; }
     const char* GetLastErrorMessage() { return PQerrorMessage(m_pConnection); }
 
-    PGresult* Query(lua_State* luaVM);
+    PGresult* Query(std::string sQuery);
     bool Exec(lua_State* luaVM);
 };

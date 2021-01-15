@@ -6,9 +6,10 @@
 int CFunctions::pg_conn(lua_State* luaVM)
 {
     std::string sConnectionInfo;
-    CScriptArgStream pArgs(luaVM);
 
-    if (pArgs.ReadString(sConnectionInfo))
+    CScriptArgStream argStream(luaVM);
+    
+    if (argStream.ReadString(sConnectionInfo))
     {
         CPostgresConnection* pConn = CPostgresManager::NewConnection(luaVM, sConnectionInfo);
     
@@ -34,18 +35,21 @@ int CFunctions::pg_conn(lua_State* luaVM)
 
 int CFunctions::pg_query(lua_State* luaVM)
 {
-    LUA_FUNCTION_ASSERT("pg_query", lua_gettop(luaVM) > 1);
-
-    CPostgresConnection* pConnection = static_cast<CPostgresConnection*>(lua_touserdata(luaVM, 1));
+    std::string sQuery;
+    CPostgresConnection* pConnection;
+    CScriptArgStream argStream(luaVM);
     
-    if (pConnection && pConnection->IsConnected())
+    if (argStream.ReadUserData(pConnection) && argStream.ReadString(sQuery))
     {
-        PGresult* pResult = pConnection->Query(luaVM);
-
-        if (pResult)
+        if (pConnection->IsConnected())
         {
-            lua_pushlightuserdata(luaVM, pResult);
-            return 1;
+            PGresult* pResult = pConnection->Query(sQuery);
+
+            if (pResult)
+            {
+                lua_pushlightuserdata(luaVM, pResult);
+                return 1;
+            }
         }
     }
         
@@ -56,13 +60,15 @@ int CFunctions::pg_query(lua_State* luaVM)
 
 int CFunctions::pg_exec(lua_State* luaVM)
 {
-    LUA_FUNCTION_ASSERT("pg_exec", lua_gettop(luaVM) > 1);
+    CPostgresConnection* pConnection;
+    CScriptArgStream argStream(luaVM);
 
-    CPostgresConnection* pConnection = static_cast<CPostgresConnection*>(lua_touserdata(luaVM, 1));
-    
-    if (pConnection && pConnection->IsConnected())
+    if (argStream.ReadUserData(pConnection))
     {
-        lua_pushboolean(luaVM, pConnection->Exec(luaVM));
+        if (pConnection->IsConnected())
+        {
+            lua_pushboolean(luaVM, pConnection->Exec(luaVM));
+        }
     }
         
     lua_pushboolean(luaVM, false);
@@ -72,11 +78,10 @@ int CFunctions::pg_exec(lua_State* luaVM)
 
 int CFunctions::pg_poll(lua_State* luaVM)
 {
-    LUA_FUNCTION_ASSERT("pg_poll", lua_gettop(luaVM) == 1);
+    PGresult* pResult;
+    CScriptArgStream argStream(luaVM);
 
-    PGresult* pResult = static_cast<PGresult*>(lua_touserdata(luaVM, 1));
-    
-    if (pResult)
+    if (argStream.ReadUserData(pResult))
     {
         int ncols = PQnfields(pResult);
         int nrows = PQntuples(pResult);
@@ -106,11 +111,11 @@ int CFunctions::pg_poll(lua_State* luaVM)
 
 int CFunctions::pg_free(lua_State* luaVM)
 {
-    LUA_FUNCTION_ASSERT("pg_free", lua_gettop(luaVM) == 1);
+    PGresult* pResult;
 
-    PGresult* pResult = static_cast<PGresult*>(lua_touserdata(luaVM, 1));
+    CScriptArgStream argStream(luaVM);
     
-    if (pResult)
+    if (argStream.ReadUserData(pResult))
     {
         PQclear(pResult);
         lua_pushboolean(luaVM, true);
@@ -124,11 +129,10 @@ int CFunctions::pg_free(lua_State* luaVM)
 
 int CFunctions::pg_close(lua_State* luaVM)
 {
-    LUA_FUNCTION_ASSERT("pg_close", lua_gettop(luaVM) == 1);
+    CPostgresConnection* pConnection;
+    CScriptArgStream argStream(luaVM);
 
-    CPostgresConnection* pConnection = static_cast<CPostgresConnection*>(lua_touserdata(luaVM, 1));
-    
-    if (pConnection)
+    if (argStream.ReadUserData(pConnection))
     {
         g_pPostgresManager->RemoveConnection(pConnection);
 
