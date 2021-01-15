@@ -12,6 +12,8 @@
 /* MTA-SA Module SDK */
 #include "Common.h"
 #include "ILuaModuleManager.h"
+#include "lua/lua.h"
+
 
 /* Function-related defines for easier working with API */
 #define LUA_FUNCTION_DECLARE(function)  static int function(lua_State* luaVM)

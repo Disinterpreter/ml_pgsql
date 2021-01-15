@@ -9,7 +9,7 @@ private:
     PGconn* m_pConnection = nullptr;
 
 public:
-    CPostgresConnection(lua_State* pLuaVM, const char* szConnectionInfo);
+    CPostgresConnection(lua_State* pLuaVM, std::string sConnectionInfo);
     ~CPostgresConnection();
 
     lua_State* GetVM() { return m_pLuaVM; }

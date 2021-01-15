@@ -16,7 +16,7 @@ public:
 
     void Add(CPostgresConnection* pConnection) { m_vecConnections.push_back(pConnection); }
 
-    static CPostgresConnection* NewConnection(lua_State* pLuaVM);
+    static CPostgresConnection* NewConnection(lua_State* pLuaVM, std::string sConnectionInfo);
     void CloseAllConnections(lua_State* pLuaVM = nullptr);
     void RemoveConnection(CPostgresConnection* pConnection);
 };

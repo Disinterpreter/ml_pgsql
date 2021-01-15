@@ -20,10 +20,10 @@ project "ml_pgsql"
 	}
 			
 	filter { "system:windows", "platforms:x86" }
-		links { "Lua", "x86\\libpq.lib" }
+		links { "x86\\lua5.1.lib", "x86\\libpq.lib" }
 		
 	filter { "system:windows", "platforms:x64" }
-		links { "Lua", "x64\\libpq.lib" }
+		links { "x64\\lua5.1.lib", "x64\\libpq.lib" }
 	
 	filter "system:linux"
 		links { "pq" }

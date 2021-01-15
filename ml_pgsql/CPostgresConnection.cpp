@@ -1,9 +1,9 @@
 #include "CPostgresConnection.h"
 
 
-CPostgresConnection::CPostgresConnection(lua_State* pLuaVM, const char* szConnectionInfo) : m_pLuaVM{pLuaVM}
+CPostgresConnection::CPostgresConnection(lua_State* pLuaVM, std::string sConnectionInfo) : m_pLuaVM{pLuaVM}
 {
-    m_pConnection = PQconnectdb(szConnectionInfo);
+    m_pConnection = PQconnectdb(sConnectionInfo.c_str());
 }
 
 

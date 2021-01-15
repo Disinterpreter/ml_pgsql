@@ -13,10 +13,9 @@ CPostgresManager::~CPostgresManager()
 }
 
 
-CPostgresConnection* CPostgresManager::NewConnection(lua_State* pLuaVM)
+CPostgresConnection* CPostgresManager::NewConnection(lua_State* pLuaVM, std::string sConnectionInfo)
 {
-    const char* szConnectionInfo = luaL_checkstring(pLuaVM, 1);
-    CPostgresConnection* pConnection = new CPostgresConnection(pLuaVM, szConnectionInfo);
+    CPostgresConnection* pConnection = new CPostgresConnection(pLuaVM, sConnectionInfo);
     
     if (pConnection && pConnection->IsConnected())
         g_pPostgresManager->Add(pConnection);

@@ -21,7 +21,3 @@ solution "ml_pgsql"
 		optimize "On"
 		
 	include "ml_pgsql"
-	
-	group "vendor"
-		include "vendor/libpq"
-		include "vendor/lua"
