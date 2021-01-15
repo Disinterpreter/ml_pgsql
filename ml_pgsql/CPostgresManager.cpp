@@ -1,5 +1,5 @@
 #include "CPostgresManager.h"
-
+#include <algorithm>
 
 CPostgresManager::CPostgresManager()
 {
