@@ -8,7 +8,9 @@ solution "ml_pgsql"
 	
 	pic "On"
 	symbols "On"
-
+	
+	defines { "_CRT_SECURE_NO_WARNINGS" }
+	
 	filter "system:windows"
 		defines { "WINDOWS", "WIN32" }
 

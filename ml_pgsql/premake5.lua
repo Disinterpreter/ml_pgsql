@@ -4,7 +4,7 @@ project "ml_pgsql"
 	kind "SharedLib"
 	targetname "ml_pgsql"
 	
-	includedirs { "include", ".", "../vendor" }
+	includedirs { ".", "../vendor", "../vendor/sparsehash/src" }
 	libdirs { "../libs" }
 
 	vpaths {

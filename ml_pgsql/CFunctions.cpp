@@ -1,7 +1,7 @@
 #include "ml_pgsql.h"
 #include "CFunctions.h"
 #include "CPostgresManager.h"
-
+#include "CScriptArgReader.h"
 
 int CFunctions::pg_conn(lua_State* luaVM)
 {

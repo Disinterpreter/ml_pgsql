@@ -1,7 +1,7 @@
 #include "ml_pgsql.h"
 #include "CFunctions.h"
 #include "CPostgresManager.h"
-
+#include "SharedUtil/SharedUtil.h"
 
 ILuaModuleManager10* g_pLuaModuleManager;
 std::unique_ptr<CPostgresManager> g_pPostgresManager;
@@ -24,8 +24,6 @@ MTAEXPORT bool InitModule(ILuaModuleManager10 *pManager, char *szModuleName, cha
 
 MTAEXPORT void RegisterFunctions(lua_State *luaVM)
 {
-    lua_Debug debuginfo;
-
 	if (g_pLuaModuleManager && luaVM)
 	{
         // Register functions
