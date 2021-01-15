@@ -1,5 +1,5 @@
 /*
-** $Id: lua.h,v 1.218.1.5 2008/08/06 13:30:12 roberto Exp $
+** $Id: lua.h,v 1.218.1.7 2012/01/13 20:36:20 roberto Exp $
 ** Lua - An Extensible Extension Language
 ** Lua.org, PUC-Rio, Brazil (http://www.lua.org)
 ** See Copyright Notice at the end of this file
@@ -17,9 +17,9 @@
 
 
 #define LUA_VERSION	"Lua 5.1"
-#define LUA_RELEASE	"Lua 5.1.4"
+#define LUA_RELEASE	"Lua 5.1.5"
 #define LUA_VERSION_NUM	501
-#define LUA_COPYRIGHT	"Copyright (C) 1994-2008 Lua.org, PUC-Rio"
+#define LUA_COPYRIGHT	"Copyright (C) 1994-2012 Lua.org, PUC-Rio"
 #define LUA_AUTHORS 	"R. Ierusalimschy, L. H. de Figueiredo & W. Celes"
 
 
@@ -55,7 +55,13 @@ typedef int (*lua_CFunction) (lua_State *L);
 ** MTA Specific stuff written by Oli for pre C Function call hooking
 */
 typedef int (*lua_PreCallHook) ( lua_CFunction f, lua_State* L );
-void lua_registerPreCallHook ( lua_PreCallHook f );
+LUA_API void lua_registerPreCallHook ( lua_PreCallHook f );
+typedef void (*lua_PostCallHook) ( lua_CFunction f, lua_State* L );
+LUA_API void lua_registerPostCallHook ( lua_PostCallHook f );
+
+// MTA Specific
+typedef int (*lua_UndumpHook) ( const char* p, size_t n );
+LUA_API void lua_registerUndumpHook ( lua_UndumpHook f );
 
 /*
 ** functions that read/write blocks when loading/dumping Lua chunks
@@ -89,7 +95,7 @@ typedef void * (*lua_Alloc) (void *ud, void *ptr, size_t osize, size_t nsize);
 
 
 /* minimum Lua stack available to a C function */
-#define LUA_MINSTACK	20
+#define LUA_MINSTACK	50     // MTA change. Was 20
 
 
 /*
@@ -132,6 +138,7 @@ LUA_API void  (lua_remove) (lua_State *L, int idx);
 LUA_API void  (lua_insert) (lua_State *L, int idx);
 LUA_API void  (lua_replace) (lua_State *L, int idx);
 LUA_API int   (lua_checkstack) (lua_State *L, int sz);
+LUA_API int   (lua_getstackgap) (lua_State *L);         // MTA addition
 
 LUA_API void  (lua_xmove) (lua_State *from, lua_State *to, int n);
 
@@ -153,6 +160,7 @@ LUA_API int            (lua_lessthan) (lua_State *L, int idx1, int idx2);
 
 LUA_API lua_Number      (lua_tonumber) (lua_State *L, int idx);
 LUA_API lua_Integer     (lua_tointeger) (lua_State *L, int idx);
+LUA_API lua_Integer     (lua_tointegerW) (lua_State *L, int idx);   // MTA Specific
 LUA_API int             (lua_toboolean) (lua_State *L, int idx);
 LUA_API const char     *(lua_tolstring) (lua_State *L, int idx, size_t *len);
 LUA_API size_t          (lua_objlen) (lua_State *L, int idx);
@@ -177,7 +185,6 @@ LUA_API void  (lua_pushcclosure) (lua_State *L, lua_CFunction fn, int n);
 LUA_API void  (lua_pushboolean) (lua_State *L, int b);
 LUA_API void  (lua_pushlightuserdata) (lua_State *L, void *p);
 LUA_API int   (lua_pushthread) (lua_State *L);
-
 
 /*
 ** get functions (Lua -> stack)
@@ -213,7 +220,14 @@ LUA_API int   (lua_load) (lua_State *L, lua_Reader reader, void *dt,
                                         const char *chunkname);
 
 LUA_API int (lua_dump) (lua_State *L, lua_Writer writer, void *data);
-
+// MTA specific: Returns the number of expected results in a C call.
+// Note that this will no longer be reliable if another C function is
+// called before calling lua_ncallresult.
+// It will also not be reliable in case of incorrectly called functions
+// e.g.
+//   local a, b = tostring(3)
+// will return 2, despite tostring only returning one number
+LUA_API int (lua_ncallresult) (lua_State* L);
 
 /*
 ** coroutine functions
@@ -349,6 +363,7 @@ LUA_API int lua_sethook (lua_State *L, lua_Hook func, int mask, int count);
 LUA_API lua_Hook lua_gethook (lua_State *L);
 LUA_API int lua_gethookmask (lua_State *L);
 LUA_API int lua_gethookcount (lua_State *L);
+LUA_API void lua_addtotalbytes(lua_State *L, int n);
 
 
 struct lua_Debug {
@@ -370,7 +385,7 @@ struct lua_Debug {
 
 
 /******************************************************************************
-* Copyright (C) 1994-2008 Lua.org, PUC-Rio.  All rights reserved.
+* Copyright (C) 1994-2012 Lua.org, PUC-Rio.  All rights reserved.
 *
 * Permission is hereby granted, free of charge, to any person obtaining
 * a copy of this software and associated documentation files (the

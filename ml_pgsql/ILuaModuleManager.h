@@ -7,9 +7,9 @@
 
 extern "C"
 {
-    #include "lua/lua.h"
-    #include "lua/lualib.h"
-    #include "lua/lauxlib.h"
+    #include "lua/src/lua.h"
+    #include "lua/src/lualib.h"
+    #include "lua/src/lauxlib.h"
 }
 #include <string>
 

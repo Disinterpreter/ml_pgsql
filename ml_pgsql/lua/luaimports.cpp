@@ -31,10 +31,10 @@
 #include <stdarg.h>
 #include "Common.h"
 #include "ILuaModuleManager.h"
-#include "lua/lauxlib.h"
-#include "lua/luaconf.h"
-#include "lua/lua.h"
-#include "lua/lualib.h"
+#include "lua/src/lauxlib.h"
+#include "lua/src/luaconf.h"
+#include "lua/src/lua.h"
+#include "lua/src/lualib.h"
 
 /* This file extracts the lua function addresses from the server core to avoid lua gc crashes */
 
@@ -58,6 +58,7 @@ static void* plua_remove = 0;
 static void* plua_insert = 0;
 static void* plua_replace = 0;
 static void* plua_checkstack = 0;
+static void* plua_getstackgap = 0;
 static void* plua_xmove = 0;
 
 /*
@@ -208,7 +209,7 @@ static void* pluaL_pushresult = 0;
   p ## x = dlsym(dl, #x); \
   if (p ## x == 0) \
   { \
-    g_pLuaModuleManager->Printf("[Sockets] Unable to import " #x ": %s\n", dlerror()); \
+    g_pLuaModuleManager->Printf("[PgSQL] Unable to import " #x ": %s\n", dlerror()); \
     return false; \
   }
 
@@ -224,7 +225,7 @@ bool ImportLua()
 #endif
   if (!dl)
   {
-    g_pLuaModuleManager->ErrorPrintf("[Sockets] Unable to open deathmatch.so: %s\n", dlerror());
+    g_pLuaModuleManager->ErrorPrintf("[PgSQL] Unable to open deathmatch.so: %s\n", dlerror());
     return false;
   }
 
@@ -246,6 +247,7 @@ bool ImportLua()
   SAFE_IMPORT(lua_insert);
   SAFE_IMPORT(lua_replace);
   SAFE_IMPORT(lua_checkstack);
+  SAFE_IMPORT(lua_getstackgap);
   SAFE_IMPORT(lua_xmove);
 
   /*
@@ -416,6 +418,7 @@ typedef void  (*lua_remove_t)(lua_State *ls, int idx);
 typedef void  (*lua_insert_t)(lua_State *ls, int idx);
 typedef void  (*lua_replace_t)(lua_State *ls, int idx);
 typedef int   (*lua_checkstack_t)(lua_State *ls, int sz);
+typedef int   (*lua_getstackgap_t)(lua_State *L);
 
 typedef void  (*lua_xmove_t)(lua_State *from, lua_State *to, int n);
 
@@ -652,6 +655,10 @@ int   (lua_checkstack) (lua_State *ls, int sz)
   LRET(lua_checkstack, ls, sz);
 }
 
+int (lua_getstackgap) (lua_State *L)
+{
+  LRET(lua_getstackgap, L);
+}
 
 void  (lua_xmove) (lua_State *from, lua_State *to, int n)
 {
